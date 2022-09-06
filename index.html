@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      // https://medium.com/weekly-webtips/deep-clone-with-vanilla-js-5ef16e0b365c
+      function cloneDeep(entity, cache = new WeakMap()) {
+        const referenceTypes = ['Array', 'Object', 'Map', 'Set', 'Date'];
+        const entityType = Object.prototype.toString.call(entity);
+        if (
+          !new RegExp(referenceTypes.join('|')).test(entityType) ||
+          entity instanceof WeakMap ||
+          entity instanceof WeakSet
+        )
+          return entity;
+        if (cache.has(entity)) {
+          return cache.get(entity);
+        }
+        const c = new entity.constructor();
+
+        if (entity instanceof Map) {
+          entity.forEach((value, key) =>
+            c.set(cloneDeep(key), cloneDeep(value))
+          );
+        }
+        if (entity instanceof Set) {
+          entity.forEach((value) => c.add(cloneDeep(value)));
+        }
+        if (entity instanceof Date) {
+          return new Date(entity);
+        }
+        cache.set(entity, c);
+        return Object.assign(
+          c,
+          ...Object.keys(entity).map((prop) => {
+            // debugger;
+            return {
+              [prop]: cloneDeep(entity[prop], cache),
+            };
+          })
+        );
+      }
+
+      console.log(
+        cloneDeep({
+          userInfo: {
+            name: 'jack',
+            skills: [function sing() {}, function hop() {}],
+          },
+        })
+      );
+    </script>
+  </body>
+</html>
+
+<!-- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap -->
